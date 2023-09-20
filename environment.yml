@@ -1,4 +1,4 @@
-name: <GITHUB_REPOSITORY>
+name: UnsupervisedSurgery
 channels:
   - anaconda
   - pytorch
