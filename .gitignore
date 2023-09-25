@@ -1,3 +1,8 @@
+# Large data files
+UnsupervisedSurgery/data/images/*
+UnsupervisedSurgery/data/videos/*
+UnsupervisedSurgery/data/pytorch_checkpoints/*
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
