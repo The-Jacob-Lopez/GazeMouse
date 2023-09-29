@@ -1,7 +1,10 @@
 # Large data files
-UnsupervisedSurgery/data/images/*
-UnsupervisedSurgery/data/videos/*
-UnsupervisedSurgery/data/pytorch_checkpoints/*
+GazeMouse/data/images/*
+GazeMouse/data/videos/*
+GazeMouse/data/pytorch_checkpoints/*
+
+# MacOS .DS_Store
+.DS_Store
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
