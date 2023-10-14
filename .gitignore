@@ -1,7 +1,6 @@
 # Large data files
-GazeMouse/data/images/*
-GazeMouse/data/videos/*
 GazeMouse/data/pytorch_checkpoints/*
+GazeMouse/data/raw/*
 
 # MacOS .DS_Store
 .DS_Store
