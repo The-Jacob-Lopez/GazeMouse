@@ -1,9 +1,9 @@
 {
-    "python.linting.pylintEnabled": true,
-    "python.formatting.provider": "yapf",
-    "editor.rulers": [
-        80
+    "[python]": {
+        "editor.defaultFormatter": "ms-python.autopep8"
+    },
+    "python.formatting.provider": "none",
+    "pylint.args": [
+        "--rcfile=${workspaceFolder}/.pylintrc"
     ],
-    "editor.formatOnSave": true,
-    "python.linting.enabled": true,
 }
