@@ -68,7 +68,7 @@ def capture_screen():
 
         # Convert to PIL and resize to the label_widget
         captured_image = Image.fromarray(image_bytes)
-        captured_image = captured_image.resize((width, height))
+        captured_image = _resize_image_to_window(captured_image)
 
         # Display in the label
         photo_image = ImageTk.PhotoImage(image=captured_image)
@@ -77,6 +77,17 @@ def capture_screen():
     
     # Repeat the same process after every 10 milliseconds
     label_widget.after(10, capture_screen)
+
+
+def _resize_image_to_window(image):
+    """
+    Scales an image to fit within the height and width 
+    """
+    scaling_factor = min(width / image.width, height / image.height)
+    new_width = int(image.width * scaling_factor)
+    new_height = int(image.height * scaling_factor)
+    return image.resize((new_width, new_height))
+
 
 
 # Create a button to open the camera in GUI app
