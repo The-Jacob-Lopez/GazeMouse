@@ -29,9 +29,9 @@ def normalize(data):
 
 def prepare_data(data):
     face, eye_left, eye_right, face_mask, y = data
-    eye_left = normalize(eye_left).transpose(0,3,1,2)
-    eye_right = normalize(eye_right).transpose(0,3,1,2)
-    face = normalize(face).transpose(0,3,1,2)
+    eye_left = normalize(eye_left)
+    eye_right = normalize(eye_right)
+    face = normalize(face)
     face_mask = np.reshape(face_mask, (face_mask.shape[0], -1)).astype('float32')
     y = y.astype('float32')
     return [face, eye_left, eye_right, face_mask, y]
@@ -40,22 +40,38 @@ def prepare_data(data):
 class ITrackerData(torch.utils.data.Dataset):
     def __init__(self, data, im_shape=(224,224), grid_shape=(25, 25)):
         self.face, self.eye_left, self.eye_right, self.face_mask, self.y = data
+            
         self.imSize = im_shape
         self.gridSize = grid_shape
-        
-        #train_data, val_data = load_data(self.data)
-        #self.train_data = prepare_data(train_data)
-        #self.val_data = prepare_data(val_data)
-
+            
     def __getitem__(self, index):
+        
         face, eye_left, eye_right, face_mask, y = \
              self.face[index], self.eye_left[index], \
              self.eye_right[index], self.face_mask[index], \
              self.y[index]
-        face, eye_left, eye_right, face_mask, y =\
-            torch.FloatTensor(face), torch.FloatTensor(eye_left), \
-            torch.FloatTensor(eye_right), torch.FloatTensor(face_mask), \
+             
+        # Make into torch tensors
+        face, eye_left, eye_right, face_mask, y = \
+            torch.FloatTensor(face),\
+            torch.FloatTensor(eye_left),\
+            torch.FloatTensor(eye_right),\
+            torch.FloatTensor(face_mask),\
             torch.FloatTensor(y)
+            
+        # Permute images
+        face, eye_left, eye_right = \
+           face.permute(2,0,1),\
+            eye_left.permute(2,0,1),\
+            eye_right.permute(2,0,1)
+            
+        # Resize images
+        resize = transforms.Resize(self.imSize)
+        face, eye_left, eye_right = \
+            resize(face),\
+            resize(eye_left),\
+            resize(eye_right)
+        
         return face, eye_left, eye_right, face_mask, y
     
         
