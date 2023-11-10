@@ -56,7 +56,7 @@ options = vision.FaceLandmarkerOptions(base_options=base_options,
                                        num_faces=1)
 detector = vision.FaceLandmarker.create_from_options(options)
 
-
+# TODO: adopt this code: https://mediapipe.readthedocs.io/en/latest/solutions/face_mesh.html#:~:text=For%20webcam%20input%3A-,drawing_spec%20%3D%20mp_drawing.DrawingSpec(thickness%3D1%2C%20circle_radius%3D1),-cap%20%3D%20cv2
 class mediapipa_webcam_recorder(webcam_recorder):
     def capture(self):
         _, frame = self.vid.read()
