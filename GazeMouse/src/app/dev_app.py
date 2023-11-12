@@ -3,14 +3,17 @@ from PIL import ImageTk
 from multiprocessing import Queue
 from src.app.screen_recorder import screen_recorder
 from src.app.webcam_recorder import webcam_recorder
+from src.app.saliency_screen_recorder import saliency_screen_recorder
 from src.app.mediapipe_webcam_recorder import mediapipa_webcam_recorder
 import multiprocessing
+
 
 # Multiprocessed variables instantiated as global
 screen_capture_queue = Queue(maxsize=2)
 webcam_capture_queue = Queue(maxsize=2)
 
-screen_capture = screen_recorder(screen_capture_queue, width = 800, height = 600)
+#screen_capture = screen_recorder(screen_capture_queue, width = 800, height = 600)
+screen_capture = screen_recorder(saliency_screen_recorder, width = 800, height = 600)
 #webcam_capture = webcam_recorder(webcam_capture_queue, width = 800, height = 600)
 webcam_capture = mediapipa_webcam_recorder(webcam_capture_queue, width = 800, height = 600)
 
