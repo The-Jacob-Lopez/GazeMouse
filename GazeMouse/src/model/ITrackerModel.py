@@ -21,7 +21,7 @@ class ItrackerImageModel(nn.Module):
             nn.ReLU(inplace=True),
             nn.Conv2d(384, 64, kernel_size=1, stride=1, padding=0),
             nn.ReLU(inplace=True),
-            
+
         )
 
     def forward(self, x):
@@ -30,7 +30,7 @@ class ItrackerImageModel(nn.Module):
         return x
 
 class FaceImageModel(nn.Module):
-    
+
     def __init__(self):
         super(FaceImageModel, self).__init__()
         self.conv = ItrackerImageModel()
@@ -96,5 +96,5 @@ class ITrackerModel(nn.Module):
         # Cat all
         x = torch.cat((xEyes, xFace, xGrid), 1)
         x = self.fc(x)
-        
+
         return x
