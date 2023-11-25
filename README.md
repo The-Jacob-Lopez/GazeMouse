@@ -1,9 +1,7 @@
 # GazeMouse: An accessible and mouse replacement
 
-### Prerequisites
+## Prerequisites
 For dependency management we use [conda](https://conda.io/projects/conda/en/latest/user-guide/install/index.html). Go ahead and install it if you don't have it already.
-
-### Installation
 
 ## Getting Started
 1. Clone the repository 
@@ -18,6 +16,11 @@ For dependency management we use [conda](https://conda.io/projects/conda/en/late
    ```sh
    conda env create -f environment-cuda.yml
    ```
+3. Python may struggle to find the appropriate modules created in this repo. Fix this by entering the repo through a shell and running the following command
+   ```
+   conda develop ./GazeMouse
+   ```
+
 ## Running the App
 You can run the app by entering the repo through a shell and running the following commands
    ```sh
