@@ -46,6 +46,10 @@ def run_app():
 
         captured_image = webcam_capture_queue.get()
         
+        # TODO: fix this
+        #tracker_pred_queue.get()
+        detector_pred_queue.get()
+
         photo_image = ImageTk.PhotoImage(image=captured_image)
 
         # Displaying photoimage in the label
@@ -63,10 +67,6 @@ def run_app():
         Callback to capture and display screen content from monitor 1.
         """
         captured_image = screen_capture_queue.get()
-
-        # TODO: fix this
-        #tracker_pred_queue.get()
-        detector_pred_queue.get()
         
         # Display in the label
         photo_image = ImageTk.PhotoImage(image=captured_image)
