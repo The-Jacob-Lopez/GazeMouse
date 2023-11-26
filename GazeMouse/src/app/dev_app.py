@@ -6,6 +6,8 @@ from src.app.webcam_recorder import webcam_recorder
 from src.app.predictive_webcam_recorder import predictive_webcam_recorder
 from src.app.mediapipe_webcam_recorder import mediapipa_webcam_recorder
 import multiprocessing
+from src.app.mediapipe_webcam_recorder import draw_landmarks_on_image
+from PIL import Image
 
 # Multiprocessed variables instantiated as global
 screen_capture_queue = Queue(maxsize=2)
@@ -15,7 +17,7 @@ detector_pred_queue = Queue(maxsize=2)
 
 screen_capture = screen_recorder(screen_capture_queue, width = 800, height = 600)
 #webcam_capture = webcam_recorder(webcam_capture_queue, width = 800, height = 600)
-webcam_capture = predictive_webcam_recorder(webcam_capture_queue, tracker_pred_queue, detector_pred_queue, enable_tracking=False)
+webcam_capture = predictive_webcam_recorder(webcam_capture_queue, tracker_pred_queue, detector_pred_queue)
 
 def run_app():
  
@@ -46,10 +48,15 @@ def run_app():
 
         captured_image = webcam_capture_queue.get()
         
-        # TODO: fix this
-        #tracker_pred_queue.get()
-        detector_pred_queue.get()
-
+        # TODO: connect this prediction to mouse input
+        tracker_pred = tracker_pred_queue.get()
+        
+        # TODO: connect this for facial expression detection
+        detector_pred = detector_pred_queue.get()
+        
+        #overlay detector prediction on face 
+        captured_image = Image.fromarray(draw_landmarks_on_image(captured_image, detector_pred))
+        
         photo_image = ImageTk.PhotoImage(image=captured_image)
 
         # Displaying photoimage in the label

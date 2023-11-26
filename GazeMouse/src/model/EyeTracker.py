@@ -48,17 +48,6 @@ def get_static_normalize(normalizer_file):
         return np.reshape(data, shape)
     return static_normalize
 
-def cropper(image):
-    frame = mp.Image(image_format=mp.ImageFormat.SRGB, data=image)
-    detection_result = detector.detect(frame)
-    frame = frame.numpy_view()
-    
-    left_eye_crop = item_crop(frame, detection_result, left_eye_landmark_indeces)
-    right_eye_crop = item_crop(frame, detection_result, right_eye_landmark_indeces)
-    face_crop = item_crop(frame, detection_result, face_landmark_indeces)
-    face_mask = item_mask(frame, detection_result, face_landmark_indeces)
-    return face_crop, left_eye_crop, right_eye_crop, face_mask
-
 def prepare_model(torch_device, itracker_checkpoint):
     model = ITrackerModel()
     model.load_state_dict(torch.load(itracker_checkpoint))
@@ -126,9 +115,13 @@ class EyeTracker:
         face, eye_left, eye_right, face_mask = face.unsqueeze(0), eye_left.unsqueeze(0), eye_right.unsqueeze(0), face_mask.unsqueeze(0)
         return face, eye_left, eye_right, face_mask
 
+    # May return None in the case that the detector does not detect a face
     def e2e_gaze_prediction(self, image):
         frame = mp.Image(image_format=mp.ImageFormat.SRGB, data=image)
         detection_result = self.detector.detect(frame)
+        if len(detection_result.face_landmarks) == 0:
+            return None
+
         frame = frame.numpy_view()
 
         left_eye_crop = item_crop(frame, detection_result, EyeTracker.left_eye_landmark_indeces)
@@ -139,4 +132,4 @@ class EyeTracker:
 
     def gaze_prediction(self, face_crop, left_eye_crop, right_eye_crop, face_mask):
         face, eyes_left, eyes_right, mask = self.prepare_data(face_crop, left_eye_crop, right_eye_crop, face_mask)
-        return self.model(face, eyes_left, eyes_right, mask)
+        return self.model(face, eyes_left, eyes_right, mask).cpu().detach().numpy()
