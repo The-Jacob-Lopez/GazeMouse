@@ -6,6 +6,14 @@ import mediapipe as mp
 import numpy as np
 from src.app.mediapipe_webcam_recorder import detector
 import multiprocessing
+from src.model.EyeTracker import EyeTracker
+from pathlib import Path
+
+itracker_checkpoint = str(Path('GazeMouse/data/uploadable_checkpoints/best_gazecapture_model.pth'))
+torch_device = 'cuda:0'
+normalizer_file = str(Path('GazeMouse/data/numpy/normalize_mean.npy'))
+detector_checkpoint = str(Path('GazeMouse/data/uploadable_checkpoints/face_landmarker_v2_with_blendshapes.task'))
+tracker = EyeTracker(itracker_checkpoint, torch_device, normalizer_file, detector_checkpoint)
 
 class periodic_worker:
     def __init__(self, output_queue:Queue):
@@ -39,21 +47,19 @@ class responsive_worker:
 class responsive_tracker(responsive_worker):
     def __init__(self, input_queue:Queue, output_queue:Queue):
         super().__init__(input_queue, output_queue)
+        
+    def process(self, input):
+        #Note, this will break when a face is not detected
+        return tracker.e2e_gaze_prediction(input)
 
 class responsive_detector(responsive_worker):
     def __init__(self, input_queue:Queue, output_queue:Queue):
         super().__init__(input_queue, output_queue)
         
     def process(self, input):
-        #_, frame = self.vid.read()
-        #opencv_image = cv2.cvtColor(input, cv2.COLOR_BGR2RGB)
-        print(50)
         captured_image = np.asarray(input)
-        print(52)
         mp_image = mp.Image(image_format=mp.ImageFormat.SRGB, data=captured_image)
-        print(54)
         detection_result = detector.detect(mp_image)
-        print(56)
         return detection_result
 
 class predictive_webcam_recorder(periodic_worker):
@@ -85,11 +91,10 @@ class predictive_webcam_recorder(periodic_worker):
 
     def process(self):
         _, frame = self.vid.read()
-        opencv_image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGBA)
+        opencv_image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         captured_image = Image.fromarray(opencv_image)
-        
         #send to other workers
-        self._send_to_workers(captured_image)
+        self._send_to_workers(opencv_image)
         return captured_image
     
     def start_processing(self):
