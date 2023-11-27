@@ -1,18 +1,23 @@
 from tkinter import Tk, Label, Button
 from PIL import ImageTk
-from multiprocessing import Queue
+from multiprocessing import Queue, freeze_support
 from src.app.screen_recorder import screen_recorder
 from src.app.webcam_recorder import webcam_recorder
+from src.app.predictive_webcam_recorder import predictive_webcam_recorder
 from src.app.mediapipe_webcam_recorder import mediapipa_webcam_recorder
 import multiprocessing
+from src.app.mediapipe_webcam_recorder import draw_landmarks_on_image
+from PIL import Image
 
 # Multiprocessed variables instantiated as global
 screen_capture_queue = Queue(maxsize=2)
 webcam_capture_queue = Queue(maxsize=2)
+tracker_pred_queue = Queue(maxsize=2)
+detector_pred_queue = Queue(maxsize=2)
 
 screen_capture = screen_recorder(screen_capture_queue, width = 800, height = 600)
 #webcam_capture = webcam_recorder(webcam_capture_queue, width = 800, height = 600)
-webcam_capture = mediapipa_webcam_recorder(webcam_capture_queue, width = 800, height = 600)
+webcam_capture = predictive_webcam_recorder(webcam_capture_queue, tracker_pred_queue, detector_pred_queue)
 
 def run_app():
  
@@ -21,7 +26,7 @@ def run_app():
     # Shut down all processes on app close
     def shutdown():
         screen_capture.stop_recording()
-        webcam_capture.stop_recording()
+        webcam_capture.stop_processing()
         app.quit()
  
     # Key bindings
@@ -43,6 +48,15 @@ def run_app():
 
         captured_image = webcam_capture_queue.get()
         
+        # TODO: connect this prediction to mouse input
+        tracker_pred = tracker_pred_queue.get()
+        
+        # TODO: connect this for facial expression detection
+        detector_pred = detector_pred_queue.get()
+        
+        #overlay detector prediction on face 
+        captured_image = Image.fromarray(draw_landmarks_on_image(captured_image, detector_pred))
+        
         photo_image = ImageTk.PhotoImage(image=captured_image)
 
         # Displaying photoimage in the label
@@ -60,7 +74,7 @@ def run_app():
         Callback to capture and display screen content from monitor 1.
         """
         captured_image = screen_capture_queue.get()
-
+        
         # Display in the label
         photo_image = ImageTk.PhotoImage(image=captured_image)
         screen_capture_widget.photo_image = photo_image
@@ -79,11 +93,12 @@ def run_app():
 
     # Enables capturing
     multiprocessing.Process(target=screen_capture.start_recording).start()
-    multiprocessing.Process(target=webcam_capture.start_recording).start()
+    multiprocessing.Process(target=webcam_capture.start_processing).start()
 
     # Create an infinite loop for displaying app on screen
     app.mainloop()
 
 if __name__ == "__main__":
+    freeze_support()
     run_app()
 
