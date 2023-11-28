@@ -3,6 +3,7 @@ from pathlib import Path
 import cv2
 from PIL import Image
 import numpy as np
+import mouse
 
 vid = cv2.VideoCapture(0) 
 itracker_checkpoint = str(Path('GazeMouse/data/uploadable_checkpoints/best_gazecapture_model.pth'))
@@ -16,30 +17,25 @@ def collect():
     opencv_image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
     return tracker.e2e_gaze_prediction(opencv_image)[0]
 
-def collect_samples(num_samples):
-    samples = []
+def collect_samples(num_samples, pressable = False):
+    pred_samples = []
+    pixel_samples = []
     for i in range(num_samples):
-        samples.append(collect())
-    return np.array(samples)
+        if pressable:
+            out = input('Press Enter')
+            if out == 'q':
+                break
+        print(i)
+        pred_samples.append(collect())
+        pixel_samples.append(mouse.get_position())
+    return np.array([pred_samples, pixel_samples])
 
-num_samples = 100
-
+num_samples = 200
 points = []
-input("Look at the top left and press enter")
-points.append(collect_samples(num_samples))
-
-input("Look at the top right and press enter")
-points.append(collect_samples(num_samples))
-
-input("Look at the bottom left and press enter")
-points.append(collect_samples(num_samples))
-
-input("Look at the bottom right and press enter")
-points.append(collect_samples(num_samples))
-
-points = np.array(points)
-mean_corners = np.mean(points, axis=1)
-print(mean_corners)
+input("Scroll your mouse and track it with your eyes")
+data = np.array(collect_samples(num_samples, pressable=True))
+print(data)
+print(data.shape)
 
 with open(str(Path('GazeMouse/data/numpy/calibrate.npy')), 'wb') as f:
-    np.save(f, mean_corners)
+    np.save(f, data)
