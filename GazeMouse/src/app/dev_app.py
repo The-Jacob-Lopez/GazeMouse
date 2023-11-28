@@ -21,7 +21,7 @@ settings = app_settings(screen_resolution=[2560,1440])
 # Generate the eye tracking filter
 with open(str(Path('GazeMouse/data/numpy/calibrate.npy')), 'rb') as f:
     calibration_data = np.load(f)
-tracker_filter = eye_tracking_filter(calibration_data, settings.screen_resolution, history_size=5)
+tracker_filter = eye_tracking_filter(calibration_data, settings.screen_resolution, history_size=1)
 
 # Multiprocessed variables instantiated as global
 screen_capture_queue = Queue(maxsize=2)
@@ -65,7 +65,7 @@ def run_app():
         tracker_pred = tracker_pred_queue.get()
         filtered_tracker_pred = tracker_filter(tracker_pred)
         print(filtered_tracker_pred)
-        mouse.move(filtered_tracker_pred[0], filtered_tracker_pred[1])
+        mouse.move(int(filtered_tracker_pred[0]), int(filtered_tracker_pred[1]))
         
         # TODO: connect this for facial expression detection
         detector_pred = detector_pred_queue.get()
