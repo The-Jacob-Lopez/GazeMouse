@@ -32,7 +32,7 @@ tracker_pred_queue = Queue(maxsize=2)
 detector_pred_queue = Queue(maxsize=2)
 
 #screen_capture = screen_recorder(screen_capture_queue, width = 800, height = 600)
-screen_capture = screen_recorder(saliency_screen_recorder, width = 800, height = 600)
+screen_capture = saliency_screen_recorder(screen_recorder, width = 800, height = 600)
 #webcam_capture = webcam_recorder(webcam_capture_queue, width = 800, height = 600)
 webcam_capture = predictive_webcam_recorder(webcam_capture_queue, tracker_pred_queue, detector_pred_queue)
 
