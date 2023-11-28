@@ -8,6 +8,20 @@ from src.app.mediapipe_webcam_recorder import mediapipa_webcam_recorder
 import multiprocessing
 from src.app.mediapipe_webcam_recorder import draw_landmarks_on_image
 from PIL import Image
+from src.app.app_settings import app_settings
+from pathlib import Path
+import numpy as np
+from src.app.eye_tracking_filter import eye_tracking_filter
+from scipy.interpolate import RBFInterpolator
+import mouse
+
+# Set app settings
+settings = app_settings(screen_resolution=[2560,1440])
+
+# Generate the eye tracking filter
+with open(str(Path('GazeMouse/data/numpy/calibrate.npy')), 'rb') as f:
+    calibration_data = np.load(f)
+tracker_filter = eye_tracking_filter(calibration_data, settings.screen_resolution, history_size=1)
 
 # Multiprocessed variables instantiated as global
 screen_capture_queue = Queue(maxsize=2)
@@ -48,8 +62,10 @@ def run_app():
 
         captured_image = webcam_capture_queue.get()
         
-        # TODO: connect this prediction to mouse input
         tracker_pred = tracker_pred_queue.get()
+        filtered_tracker_pred = tracker_filter(tracker_pred)
+        print(filtered_tracker_pred)
+        mouse.move(int(filtered_tracker_pred[0]), int(filtered_tracker_pred[1]))
         
         # TODO: connect this for facial expression detection
         detector_pred = detector_pred_queue.get()
