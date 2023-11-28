@@ -10,7 +10,7 @@ from src.model.EyeTracker import EyeTracker
 from pathlib import Path
 
 itracker_checkpoint = str(Path('GazeMouse/data/uploadable_checkpoints/best_gazecapture_model.pth'))
-torch_device = 'cuda:0'
+torch_device = 'cpu'
 normalizer_file = str(Path('GazeMouse/data/numpy/normalize_mean.npy'))
 detector_checkpoint = str(Path('GazeMouse/data/uploadable_checkpoints/face_landmarker_v2_with_blendshapes.task'))
 tracker = EyeTracker(itracker_checkpoint, torch_device, normalizer_file, detector_checkpoint)
