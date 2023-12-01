@@ -8,7 +8,7 @@ def normalize(a, axis=-1,):
 class expression_metric:
     def __init__(self, user_actions, action_expressions):
         self.user_actions = user_actions
-        self.action_expressions = normalize(action_expressions, axis=0)
+        self.action_expressions = action_expressions
 
     # Both expressions are numpy arrays of same size
     def expression_distance(expression_a, expression_b):

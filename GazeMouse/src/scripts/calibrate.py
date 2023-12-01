@@ -30,10 +30,10 @@ def collect_samples(num_samples, pressable = False):
         pixel_samples.append(mouse.get_position())
     return np.array([pred_samples, pixel_samples])
 
-num_samples = 200
+num_samples = 500
 points = []
 input("Scroll your mouse and track it with your eyes")
-data = np.array(collect_samples(num_samples, pressable=True))
+data = np.array(collect_samples(num_samples, pressable=False))
 print(data)
 print(data.shape)
 

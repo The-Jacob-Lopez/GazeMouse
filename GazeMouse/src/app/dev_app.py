@@ -14,6 +14,7 @@ import numpy as np
 from src.app.eye_tracking_filter import eye_tracking_filter
 from scipy.interpolate import RBFInterpolator
 import mouse
+from src.app.expression_metric import expression_metric
 
 # Set app settings
 settings = app_settings(screen_resolution=[2560,1440])
@@ -21,7 +22,7 @@ settings = app_settings(screen_resolution=[2560,1440])
 # Generate the eye tracking filter
 with open(str(Path('GazeMouse/data/numpy/calibrate.npy')), 'rb') as f:
     calibration_data = np.load(f)
-tracker_filter = eye_tracking_filter(calibration_data, settings.screen_resolution, history_size=1)
+tracker_filter = eye_tracking_filter(calibration_data, settings.screen_resolution, history_size=3)
 
 # Multiprocessed variables instantiated as global
 screen_capture_queue = Queue(maxsize=2)
@@ -32,6 +33,26 @@ detector_pred_queue = Queue(maxsize=2)
 screen_capture = screen_recorder(screen_capture_queue, width = 800, height = 600)
 #webcam_capture = webcam_recorder(webcam_capture_queue, width = 800, height = 600)
 webcam_capture = predictive_webcam_recorder(webcam_capture_queue, tracker_pred_queue, detector_pred_queue)
+
+relevant_categories = ['eyeBlinkLeft', 'eyeBlinkRight']
+def convert_detection_to_user_action(detection, history, metric):
+    detector_pred = detection.face_blendshapes[0]
+    detector_pred = [category for category in detector_pred if category.category_name in relevant_categories]
+    detector_pred = [category.score for category in detector_pred]
+    history.pop(0)
+    history.append(detector_pred)
+    detector_pred = np.mean(history, axis=0)
+    closest_action = metric.get_closest_user_action(detector_pred)
+    return closest_action
+
+# Define expression metric
+actions = np.array(settings.actions)
+with open(str(Path('GazeMouse/data/numpy/expressions.npy')), 'rb') as f:
+    action_expressions = np.load(f)
+metric = expression_metric(actions, action_expressions)
+
+# history for facial expression
+history = [[0]*2 for i in range(10)]
 
 def run_app():
  
@@ -64,11 +85,17 @@ def run_app():
         
         tracker_pred = tracker_pred_queue.get()
         filtered_tracker_pred = tracker_filter(tracker_pred)
-        print(filtered_tracker_pred)
-        mouse.move(int(filtered_tracker_pred[0]), int(filtered_tracker_pred[1]))
+        #print(filtered_tracker_pred)
+        if settings.mouse_tracking_is_active:
+            mouse.move(int(filtered_tracker_pred[0]), int(filtered_tracker_pred[1]))
         
         # TODO: connect this for facial expression detection
         detector_pred = detector_pred_queue.get()
+        closest_action = convert_detection_to_user_action(detector_pred, history, metric)
+        #print(closest_action)
+        mouse_action = settings.get_mouse_action(closest_action)
+        # activate the mouse action
+        mouse_action()
         
         #overlay detector prediction on face 
         captured_image = Image.fromarray(draw_landmarks_on_image(captured_image, detector_pred))

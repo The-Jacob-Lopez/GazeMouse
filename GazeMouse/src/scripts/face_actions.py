@@ -4,6 +4,7 @@ from src.app.app_settings import app_settings
 from multiprocessing import Queue, freeze_support
 import multiprocessing
 import numpy as np
+from pathlib import Path
 
 relevant_categories = ['eyeBlinkLeft', 'eyeBlinkRight']
 
@@ -29,16 +30,17 @@ def run():
         input(f'Give facial expression for action: {action}')
         clear()
         history = []
-        for i in range(10):
+        for i in range(100):
             captured_image = webcam_capture_queue.get()
             tracker_pred = tracker_pred_queue.get()
             detector_pred = detector_pred_queue.get().face_blendshapes[0]
             detector_pred = [category for category in detector_pred if category.category_name in relevant_categories]
             detector_pred = [category.score for category in detector_pred]
+            print(detector_pred)
             history.append(detector_pred)
         preds.append(np.mean(history, axis=0))
 
-    with open('expressions.npy', 'wb') as f:
+    with open(str(Path('GazeMouse/data/numpy/expressions.npy')), 'wb') as f:
         np.save(f, np.array(preds))    
     
     print('Done')

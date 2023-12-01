@@ -92,6 +92,7 @@ class predictive_webcam_recorder(periodic_worker):
     def process(self):
         _, frame = self.vid.read()
         opencv_image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+        opencv_image = cv2.flip(opencv_image, 1)
         captured_image = Image.fromarray(opencv_image)
         #send to other workers
         self._send_to_workers(opencv_image)

@@ -10,7 +10,7 @@ class eye_tracking_filter:
         self.interp = LinearNDInterpolator(calibration_data[0], calibration_data[1])
         self.history = [[0,0] for i in range(history_size)]
         self.curr_pos = np.array([0,0])
-        self.sensitivity = 0.20
+        self.sensitivity = 0.05
         self.screen_resolution = screen_resolution
         self.region_of_interpolation = [[min(calibration_data[0,:,0]), max(calibration_data[0,:,0])],[min(calibration_data[0,:,1]), max(calibration_data[0,:,1])]]
         self.kdtree = KDTree(calibration_data[0])
@@ -34,11 +34,8 @@ class eye_tracking_filter:
         if math.isnan(filtered_pred[0]):
             d,i = self.kdtree.query(gaze_pred, k=1)
             filtered_pred = self.interp(self.calibration_data[0][i])[0]
-        print(f'Gaze: {gaze_pred}')
-        print(f'filtered: {filtered_pred}')
-        self.history = self.history[1:]
+        self.history.pop(0)
         self.history.append(filtered_pred)
         estimated_pos = np.mean(np.array(self.history), axis=0)
-        print(estimated_pos)
         self.curr_pos = self.clip_to_screen(self.curr_pos + self.sensitivity*(estimated_pos - self.curr_pos))
         return self.curr_pos

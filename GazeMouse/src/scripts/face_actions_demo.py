@@ -13,7 +13,7 @@ def convert_detection_to_user_action(detection, history, metric):
     detector_pred = detection.face_blendshapes[0]
     detector_pred = [category for category in detector_pred if category.category_name in relevant_categories]
     detector_pred = [category.score for category in detector_pred]
-    history = history[-1:]
+    history.pop(0)
     history.append(detector_pred)
     detector_pred = np.mean(history, axis=0)
     print(detector_pred)
@@ -35,6 +35,7 @@ def run():
         action_expressions = np.load(f)
     
     metric = expression_metric(actions, action_expressions)
+    print(metric.action_expressions)
     history = [[0]*2 for i in range(10)]
     while True:
         captured_image = webcam_capture_queue.get()
