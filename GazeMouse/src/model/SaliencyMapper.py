@@ -1,34 +1,52 @@
 import torch
 import torchvision
-import Path
+from pathlib import Path
 from src.model.SaliencyModel import TranSalNet, TRANSALNET_HEIGHT, TRANSALNET_WIDTH
 
+checkpoint = 'GazeMouse/data/uploadable_checkpoints/best_transalnet_model.pth'
 
 class SaliencyMapper:
     """
     Wraps the TranSalNet model. 
     """
 
-    def __init__(self,
-                 weights="GazeMouse/data/raw/weights/best_transalnet_model.pth"):
+    def __init__(self, checkpoint=checkpoint, device="cpu"):
         """
         Creates a TranSalNet model, loads weights from the default path, and creates
         the transforms necessary to run inference on an input.
         """
         self.model = TranSalNet()
-        weights = str(Path(weights))
-        self.model.load_state_dict(torch.load(weights, map_location=torch.device('cpu')))
+        self.model = self.model.to(device)
+        self.model.load_state_dict(torch.load(str(Path(checkpoint)), map_location=torch.device(device)))
 
         self.transforms = torchvision.transforms.Compose([
-            torchvision.transforms.Resize((TRANSALNET_WIDTH, TRANSALNET_HEIGHT)),
+            torchvision.transforms.Resize((TRANSALNET_HEIGHT, TRANSALNET_WIDTH)),
             torchvision.transforms.ToTensor(),
         ])
+    
+    def _process_img(self, img):
+        # Convert to 3 channels
+        if img.mode == "RGBA":
+            img = img.convert("RGB")
 
-    def predict(self, x):
+        # Apply transformations
+        img = self.transforms(img)
+
+        # Add bs if necessary
+        if len(img.shape) == 3:
+            img = img.unsqueeze(0)
+        
+        return img
+
+    def _postprocess_pred(self, pred):
+        return pred.squeeze()
+
+
+    def predict(self, img):
         """
-        Transforms x to input of transform shape.
+        Predicts the saliency on an RGB Pillow Image.
         """
-        x = self.transforms(x)
-        x = self.model(x)
-        return x
+        img = self._process_img(img)
+        pred = self.model.forward(img)
+        return self._postprocess_pred(pred)
 
