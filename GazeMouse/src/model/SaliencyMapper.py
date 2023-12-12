@@ -3,6 +3,7 @@ import torchvision
 from pathlib import Path
 from src.model.SaliencyModel import TranSalNet, TRANSALNET_HEIGHT, TRANSALNET_WIDTH
 
+# Download from https://drive.google.com/file/d/1-LC6MdvsYdgisCWJbIvklifr1ZeDjz7q/view?usp=drive_link
 checkpoint = 'GazeMouse/data/uploadable_checkpoints/best_transalnet_model.pth'
 
 class SaliencyMapper:
