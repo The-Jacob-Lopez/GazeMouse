@@ -40,12 +40,15 @@ class SaliencyMapper:
         return img
 
     def _postprocess_pred(self, pred):
+        # Get rid of batch size and single channel
+        # This converts from [1, 1, H, W] to [H, W]
         return pred.squeeze()
 
 
     def predict(self, img):
         """
         Predicts the saliency on an RGB Pillow Image.
+        Returns predicted saliencies in the shape [H, W]
         """
         img = self._process_img(img)
         pred = self.model.forward(img)
