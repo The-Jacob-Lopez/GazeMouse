@@ -4,7 +4,6 @@ from multiprocessing import Queue, freeze_support
 from src.app.screen_recorder import screen_recorder
 from src.app.webcam_recorder import webcam_recorder
 from src.app.predictive_webcam_recorder import predictive_webcam_recorder
-from src.app.saliency_screen_recorder import saliency_screen_recorder
 from src.app.mediapipe_webcam_recorder import mediapipa_webcam_recorder
 import multiprocessing
 from src.app.mediapipe_webcam_recorder import draw_landmarks_on_image
@@ -24,15 +23,13 @@ with open(str(Path('GazeMouse/data/numpy/calibrate.npy')), 'rb') as f:
     calibration_data = np.load(f)
 tracker_filter = eye_tracking_filter(calibration_data, settings.screen_resolution, history_size=1)
 
-
 # Multiprocessed variables instantiated as global
 screen_capture_queue = Queue(maxsize=2)
 webcam_capture_queue = Queue(maxsize=2)
 tracker_pred_queue = Queue(maxsize=2)
 detector_pred_queue = Queue(maxsize=2)
 
-#screen_capture = screen_recorder(screen_capture_queue, width = 800, height = 600)
-screen_capture = saliency_screen_recorder(screen_recorder, width = 800, height = 600)
+screen_capture = screen_recorder(screen_capture_queue, width = 800, height = 600)
 #webcam_capture = webcam_recorder(webcam_capture_queue, width = 800, height = 600)
 webcam_capture = predictive_webcam_recorder(webcam_capture_queue, tracker_pred_queue, detector_pred_queue)
 
