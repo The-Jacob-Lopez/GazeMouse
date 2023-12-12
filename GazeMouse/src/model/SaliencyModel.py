@@ -24,6 +24,9 @@ from scipy import ndimage
 ACT2FN = {"gelu": torch.nn.functional.gelu, "relu": torch.nn.functional.relu}
 
 
+TRANSALNET_WIDTH = 384
+TRANSALNET_HEIGHT = 288
+
 class Attention(nn.Module):
     def __init__(self, config):
         super(Attention, self).__init__()
