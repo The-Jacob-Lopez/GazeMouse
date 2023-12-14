@@ -24,8 +24,8 @@ class Circle:
         # self.root.after(10, self.update)
 
         self.cursor_size = 5
-
-        self.cursor = self.canvas.create_oval(395, 295, 405, 305, fill="red", outline="red")
+        self.cursor = self.canvas.create_oval(395, 295, 405, 305, fill="red", outline="red")  
+        self.root.after(100, lambda: self.red_circle(500, 200, 10))
         self.root.mainloop()
 
     # def update(self):
@@ -54,7 +54,8 @@ class Circle:
 
         
     def red_circle(self, x, y, radius):
-        self.cursor_size = radius  
+        self.cursor_size = radius
+        
         self.canvas.coords(self.cursor, x - self.cursor_size, y - self.cursor_size,
                             x + self.cursor_size, y + self.cursor_size)
 
@@ -62,4 +63,5 @@ class Circle:
 
 if __name__ == "__main__":
     cursor = Circle()
+    cursor.root.mainloop()
 
