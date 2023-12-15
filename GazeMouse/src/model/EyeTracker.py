@@ -50,7 +50,7 @@ def get_static_normalize(normalizer_file):
 
 def prepare_model(torch_device, itracker_checkpoint):
     model = ITrackerModel()
-    model.load_state_dict(torch.load(itracker_checkpoint))
+    model.load_state_dict(torch.load(itracker_checkpoint, map_location=torch_device))
     model = model.to(torch_device)
     model.eval()
     return model
@@ -116,7 +116,7 @@ class EyeTracker:
         return face, eye_left, eye_right, face_mask
 
     # May return None in the case that the detector does not detect a face
-    def e2e_gaze_prediction(self, image):
+    def get_item_crops(self, image):
         frame = mp.Image(image_format=mp.ImageFormat.SRGB, data=image)
         detection_result = self.detector.detect(frame)
         if len(detection_result.face_landmarks) == 0:
@@ -128,8 +128,23 @@ class EyeTracker:
         right_eye_crop = item_crop(frame, detection_result, EyeTracker.right_eye_landmark_indeces)
         face_crop = item_crop(frame, detection_result, EyeTracker.face_landmark_indeces)
         face_mask = item_mask(frame, detection_result, EyeTracker.face_landmark_indeces)
-        return self.gaze_prediction(face_crop, left_eye_crop, right_eye_crop, face_mask)
-
+        for crop in [left_eye_crop, right_eye_crop, face_crop, face_mask]:
+            if len(crop) == 0:
+                return None
+        return face_crop, left_eye_crop, right_eye_crop, face_mask
+    
+    # May return None in the case that the detector does not detect a face
+    def e2e_gaze_prediction(self, image):
+        crops = self.get_item_crops(image)
+        if crops is None:
+            return None
+        try:
+            return self.gaze_prediction(*crops)
+        except Exception:
+            return None
+    
+    # May return None in the case that the detector does not detect a face
     def gaze_prediction(self, face_crop, left_eye_crop, right_eye_crop, face_mask):
         face, eyes_left, eyes_right, mask = self.prepare_data(face_crop, left_eye_crop, right_eye_crop, face_mask)
-        return self.model(face, eyes_left, eyes_right, mask).cpu().detach().numpy()
+        #face, eyes_left, eyes_right = [torch.permute(x, (0,2,3,1)) for x in [face, eyes_left, eyes_right]]
+        return self.model(face, eyes_left, eyes_right, mask)[0].cpu().detach().numpy()

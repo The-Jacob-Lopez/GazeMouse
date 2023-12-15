@@ -1,4 +1,9 @@
+# VSCode settings
+.vscode/*
+
 # Large data files
+GazeMouse/data/numpy/*
+GazeMouse/data/*
 GazeMouse/data/pytorch_checkpoints/*
 GazeMouse/data/raw/*
 

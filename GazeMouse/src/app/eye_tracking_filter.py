@@ -30,15 +30,14 @@ class eye_tracking_filter:
         return [nearest_x, nearest_y]
     
     def __call__(self, gaze_pred):
-        filtered_pred = self.interp(gaze_pred)[0]
+        #filtered_pred = gaze_pred
+        filtered_pred = self.interp([gaze_pred])[0]
         if math.isnan(filtered_pred[0]):
+            print("is nan")
             d,i = self.kdtree.query(gaze_pred, k=1)
             filtered_pred = self.interp(self.calibration_data[0][i])[0]
-        print(f'Gaze: {gaze_pred}')
-        print(f'filtered: {filtered_pred}')
-        self.history = self.history[1:]
+        self.history.pop(0)
         self.history.append(filtered_pred)
         estimated_pos = np.mean(np.array(self.history), axis=0)
-        print(estimated_pos)
         self.curr_pos = self.clip_to_screen(self.curr_pos + self.sensitivity*(estimated_pos - self.curr_pos))
         return self.curr_pos

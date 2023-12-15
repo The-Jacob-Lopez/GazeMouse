@@ -19,7 +19,8 @@ class SaliencyMapper:
         self.model = TranSalNet()
         self.model = self.model.to(device)
         self.model.load_state_dict(torch.load(str(Path(checkpoint)), map_location=torch.device(device)))
-
+        self.device = device
+        
         self.transforms = torchvision.transforms.Compose([
             torchvision.transforms.Resize((TRANSALNET_HEIGHT, TRANSALNET_WIDTH)),
             torchvision.transforms.ToTensor(),
@@ -31,7 +32,7 @@ class SaliencyMapper:
             img = img.convert("RGB")
 
         # Apply transformations
-        img = self.transforms(img)
+        img = self.transforms(img).to(self.device)
 
         # Add bs if necessary
         if len(img.shape) == 3:
