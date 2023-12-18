@@ -50,7 +50,7 @@ def get_static_normalize(normalizer_file):
 
 def prepare_model(torch_device, itracker_checkpoint):
     model = ITrackerModel()
-    model.load_state_dict(torch.load(itracker_checkpoint))
+    model.load_state_dict(torch.load(itracker_checkpoint, map_location=torch_device))
     model = model.to(torch_device)
     model.eval()
     return model

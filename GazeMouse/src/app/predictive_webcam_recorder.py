@@ -10,7 +10,7 @@ from src.model.EyeTracker import EyeTracker
 from pathlib import Path
 
 itracker_checkpoint = str(Path('GazeMouse/data/uploadable_checkpoints/best_gazecapture_model.pth'))
-torch_device = 'cuda:0'
+torch_device = 'cpu'
 normalizer_file = str(Path('GazeMouse/data/numpy/normalize_mean.npy'))
 detector_checkpoint = str(Path('GazeMouse/data/uploadable_checkpoints/face_landmarker_v2_with_blendshapes.task'))
 tracker = EyeTracker(itracker_checkpoint, torch_device, normalizer_file, detector_checkpoint)
@@ -92,6 +92,7 @@ class predictive_webcam_recorder(periodic_worker):
     def process(self):
         _, frame = self.vid.read()
         opencv_image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+        opencv_image = cv2.flip(opencv_image, 1)
         captured_image = Image.fromarray(opencv_image)
         #send to other workers
         self._send_to_workers(opencv_image)
