@@ -93,7 +93,7 @@ class app:
         pos, stddev = data
         self.curr_cursor_pos = pos
         self.curr_cursor_radius = stddev
-        self.root.after_idle(self.start_update_cursor)  
+        self.root.after(100, self.start_update_cursor)  
 
     def start_update_action(self):
         pass
